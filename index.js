@@ -1,27 +1,37 @@
 import express from "express"
 import mongoose from 'mongoose';
-import cors from "cors"
-import { products } from "./products.js"
+import bodyParser from 'body-parser';
 
 const app = express()
 
-mongoose.connect("mongodb://localhost:27017/ShoeStore")
+app.use(bodyParser.json());
+
+mongoose.connect("mongodb://localhost:27017/ShoeStore", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () => {
+  console.log('Connected to the database');
+});
 
 const ProductSchema = new mongoose.Schema({
+    availableQuantity: Number,
+    catchPhrase: String,
+    category: [String],
+    discountedPrice: Number,
     id: String,
     imgAlt: String,
     imgLink: String,
     name: String,
-    type: String,
-    category: [String],
-    catchPhrase: String,
     price: Number,
-    discountedPrice: Number,
-    variations: String,
     productUrl: String,
     productSize: String,
     quantity: Number,
-    availableQuantity: Number
+    type: String,
+    variations: String,
 }, {collection : 'Products'})
 
 const ProductModel = mongoose.model("Products", ProductSchema)
@@ -34,5 +44,24 @@ app.get("/getProducts", async (req, res) => {
         res.status(500).json({message: err.message})
     }
 })
+
+const orderSchema = new mongoose.Schema({
+    payment: Object,
+    products: Object,
+    shippingAdress: Object,
+  });
+
+const Order = mongoose.model('Order', orderSchema);
+
+app.post('/api/orders', async (req, res) => {
+    try {
+      const order = new Order(req.body);
+      await order.save();
+      res.status(201).send(order);
+      console.log(order)
+    } catch (error) {
+      res.status(400).send(error);
+    }
+});
 
 app.listen(5000, () => console.log("server is running"))
