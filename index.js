@@ -12,6 +12,7 @@ mongoose.connect("mongodb://localhost:27017/ShoeStore", {
 })
 
 const db = mongoose.connection;
+
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   console.log('Connected to the database');
@@ -49,7 +50,7 @@ const orderSchema = new mongoose.Schema({
     payment: Object,
     products: Object,
     shippingAdress: Object,
-  });
+});
 
 const Order = mongoose.model('Order', orderSchema);
 
@@ -58,10 +59,9 @@ app.post('/api/orders', async (req, res) => {
       const order = new Order(req.body);
       await order.save();
       res.status(201).send(order);
-      console.log(order)
     } catch (error) {
       res.status(400).send(error);
     }
 });
 
-app.listen(5000, () => console.log("server is running"))
+app.listen(5000, () => console.log("Server is running"))
