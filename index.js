@@ -1,12 +1,17 @@
 import express from "express"
+import { config } from 'dotenv'
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import cors from 'cors'
+
+config()
 
 const app = express()
+app.use(cors());
 
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost:27017/ShoeStore", {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
@@ -18,7 +23,7 @@ db.once('open', () => {
   console.log('Connected to the database');
 });
 
-const ProductSchema = new mongoose.Schema({
+const productschema = new mongoose.Schema({
     availableQuantity: Number,
     catchPhrase: String,
     category: [String],
@@ -29,13 +34,13 @@ const ProductSchema = new mongoose.Schema({
     name: String,
     price: Number,
     productUrl: String,
-    productSize: String,
+    productsize: String,
     quantity: Number,
     type: String,
     variations: String,
-}, {collection : 'Products'})
+}, {collection : 'products'})
 
-const ProductModel = mongoose.model("Products", ProductSchema)
+const ProductModel = mongoose.model("products", productschema)
 
 app.get("/getProducts", async (req, res) => {
     try {
@@ -63,5 +68,7 @@ app.post('/api/orders', async (req, res) => {
       res.status(400).send(error);
     }
 });
+
+
 
 app.listen(5000, () => console.log("Server is running"))
